@@ -110,8 +110,86 @@ Before resuming any design work beyond Level 1, the competitive-landscape pass s
 
 ---
 
-## 7. Stack
+## 7. Stack — language/engine decision record
 
-Unity 6, C#, OpenXR, Meta OpenXR, Meta XR Core SDK, Meta XR Interaction SDK, Unity Physics — chosen over Unreal/Native OpenXR/Godot/WebXR/Spatial SDK because Meta's Interaction SDK already solves grab/poke/pose detection for Unity specifically, OpenXR is Meta's currently supported path for new Quest development, and the language layer (C#) is not expected to be the actual bottleneck — the Unity/XR domain knowledge is. Full reasoning and the rejected-alternatives table are in [`BRAINSTORM.md`](./BRAINSTORM.md).
+Per house method (`language-selection`): the language is a hypothesis explaining the constraints, not a default. Re-derived on 2026-10-05, after Anna flagged that this project — unlike the rest of her portfolio — starts at zero across Unity, C#, XR, hand tracking, MR, and 3D physics simultaneously, which made the original brainstorm's justification ("the AI already knows C# well") worth re-examining rather than re-asserting.
 
-Full submission requirements (division, hard requirements, what to submit) are in the competition material captured in `BRAINSTORM.md` — this document does not duplicate them.
+**Problem shape:** a real-time spatial-interaction application — hand-tracking input, bimanual contact physics, MR passthrough collision against real room geometry. Not a security/determinism problem (no sealed decision path, no hostile input parsing); the dominant forces are SDK/engine maturity for contact-physics-on-a-real-surface and solo-developer iteration speed under a fixed deadline.
+
+**Language imposed?** Partially. Meta defines the supported Quest development paths: [Unity → C#](https://developers.meta.com/horizon/develop/unity/), [Unreal → C++/Blueprints](https://developers.meta.com/horizon/develop/unreal/), [Native OpenXR → C/C++](https://developers.meta.com/horizon/develop/native/), [Spatial SDK → Kotlin](https://developers.meta.com/horizon/develop/spatial-sdk/), [WebXR/IWSDK → JavaScript/TypeScript](https://developers.meta.com/horizon/develop/web/). Arbitrary language choice isn't available, but more than one of these paths is genuinely viable — so the decision below compares them, rather than treating any one as given.
+
+**Decisive forces:**
+- The gating risk for the whole project (U2/U3, §3) is contact-physics/hand-tracking fidelity on real hardware — whichever path has the most mature tooling for exactly that reduces confounds during the Level 0 spike.
+- Both titles Meta itself names as references (§5) — Hand Physics Lab, Table Troopers — are native-engine builds. The engineering patterns already researched and locked into D1/D3 (windowed impact detection, room-geometry physics split) come from that world; porting them to a different stack is translation work with no public precedent found yet.
+- The maintainer (Anna) has zero prior fluency in every XR-capable candidate equally — this is **not** a fluency tie-breaker situation, because no candidate starts ahead on that axis.
+- AI assistance absorbs syntax/boilerplate/API-lookup cost (per `language-selection`'s framing) but not architecture, on-device debugging, or judgment calls like "does this feel like 80ms of lag" — the real bottleneck in this project is hands-on hardware judgment, which is identical regardless of language chosen.
+- [Unity](https://unity.com/) + [C#](https://learn.microsoft.com/en-us/dotnet/csharp/) specifically carries far more public training-corpus density for Meta hand-tracking integration than Unity+WebXR or Unreal+Blueprint equivalents, which lowers friction specifically on the delegable cost category (syntax/boilerplate), not on the non-delegable one.
+
+**Candidates surfaced:**
+
+```
+Candidate: TypeScript / WebXR (IWSDK) — the strongest rival
+Why it entered: it is Anna's actual existing stack (annaconda, koine, locoporcolt,
+                 the COMPASS frontend) and a Meta-supported competition path.
+What it buys: zero new-language and new-IDE cost; a deploy pipeline she already
+              owns (Vercel/GitHub Pages) instead of Meta's Release Channel tooling;
+              collapses "six unfamiliar domains" down to "three" (hand-tracking,
+              MR, physics) by removing language and tooling from the pile.
+What it costs: less mature room-geometry-aware contact physics and hand-tracking
+              fidelity than Meta's native Interaction SDK, as far as currently
+              available documentation and sample titles show.
+Where the guarantee ends: no public evidence yet on whether IWSDK's hand-tracking
+              API exposes confidence/joint data comparable to HandConfidence/
+              FingerConfidences (§4) with comparable fidelity — unverified, not
+              assumed absent.
+Why not chosen: the two reference titles and all the contact-physics engineering
+              precedent found in §5 are native-engine, not WebXR — this candidate
+              trades the gating-risk-relevant tooling maturity for language
+              familiarity, and the bottleneck this project actually has
+              (hardware judgment, not syntax) is the one axis language
+              familiarity doesn't help with.
+How we'd verify: a fast, direct comparison during Level 0 — if IWSDK's hand API
+              turns out to expose comparable confidence data with materially less
+              setup friction, this reopens.
+```
+
+```
+Candidate: Unreal Engine + C++/Blueprints
+Why it entered: Meta-supported path; Blueprint's visual scripting could lower the
+              zero-background barrier; strong native physics/rendering fidelity.
+What it buys: Blueprint prototyping without hand-written C++ for simple behavior.
+What it costs: Meta's own developer guidance and the original brainstorm's own
+              comparison already rank it "possible, but unnecessarily heavy" for
+              this scope; the D2 data-driven combinable-properties object system
+              needs real code eventually, past what Blueprint-only comfortably
+              expresses.
+Why not chosen: loses on scope-appropriate weight — heavier engine/toolchain for
+              no force that specifically favors it here.
+```
+
+```
+Candidate: Native OpenXR (C/C++)
+Why it entered: it's Meta's lowest-level officially supported path, full control.
+What it costs: reimplements hand-tracking interaction, physics, and rendering
+              from near-zero — Meta's own documentation states implementing hand
+              interactions manually is "considerably more difficult" than using
+              the Interaction SDK.
+Why not chosen: wrong shape for a solo 44-day build; eliminated immediately, not
+              a close call.
+```
+
+**Chosen:** [Unity 6](https://unity.com/) + [C#](https://learn.microsoft.com/en-us/dotnet/csharp/), [OpenXR](https://www.khronos.org/openxr/) via [Unity OpenXR + Meta OpenXR](https://developers.meta.com/horizon/documentation/unity/unity-openxr/), [Meta XR Core SDK](https://developers.meta.com/horizon/downloads/package/meta-xr-core-sdk/), [Meta XR Interaction SDK](https://developers.meta.com/horizon/documentation/unity/unity-isdk-interaction-sdk-overview/), Unity Physics.
+
+**Why:** the decisive force is SDK/engine maturity for the project's actual gating risk (contact-physics and hand-tracking fidelity, §3's U2/U3) and direct continuity with the engineering precedent already researched in §5 — not language familiarity, which is absent equally across every XR-capable candidate and which AI assistance substantially offsets for the parts of the cost (syntax, boilerplate, API lookup) that it actually offsets.
+
+**Guarantees relied on:** grab/poke/pose detection — provided by Meta XR Interaction SDK, not by C# itself. Cross-runtime portability of the hand-tracking/MR extensions — provided by OpenXR plus Meta's OpenXR layer, not by Unity alone.
+
+**Guarantees NOT relied on:** that C# or Unity make the project easier to *learn* for a zero-background developer than WebXR would — they don't; that choice trades a steeper tooling/domain learning curve for SDK maturity on the hardest risk, honestly, not for free.
+
+**Accepted cost:** Anna starts genuinely at zero in Unity, C#, the Unity editor workflow, and Meta's XR tooling simultaneously — mitigated by (a) implementation work going through the AI/agent layer per the working arrangement below, and (b) the cost being concentrated on exactly the domains (hand-tracking, MR, physics judgment) that no candidate language would have spared her anyway.
+
+**Reopen if:** Level 0 (§4) finds IWSDK/WebXR exposes hand-tracking confidence data at comparable fidelity with materially less setup friction than the native path — or finds the native Interaction SDK doesn't actually expose the confidence/joint metrics §4 assumes.
+
+**Working arrangement:** the code is written collaboratively by the agent/model layer: Anna owns architecture calls, acceptance criteria, and on-device judgment ("does this feel right"); implementation (C#, Unity wiring, SDK integration, tests) is agent-assisted throughout, with Anna learning the domain by reading and directing rather than typing syntax from memory first — consistent with how `language-selection` frames AI's actual cost reduction (syntax/boilerplate/API lookup) versus what it doesn't reduce (architecture, debugging, on-device judgment).
+
+Full original stack reasoning and the brainstorm-stage rejected-alternatives table are in [`BRAINSTORM.md`](./BRAINSTORM.md). Full submission requirements (division, hard requirements, what to submit) are also captured there — this document does not duplicate them.
