@@ -50,6 +50,44 @@ This is a comparison of *genres and mechanics* I can speak to with reasonable co
 
 ## VIGÍA's vote
 
-Keep H1 as a named candidate, not a committed scope. Don't resume feature design (Kitchen Rage, safety cubes, bank-shot physics) until the two gating unknowns — U2 (slap-speed tracking) and U3 (bimanual occlusion) — have an answer from a real Quest device, not from a model's prediction. The right next spend of effort is the cheapest experiment that can kill the idea: one hand grabs a cube, the other slaps it, on-device, nothing else built yet. If that doesn't feel good, no amount of combo design saves it — and that's a real result, not a failure to report.
+Keep H1 as a named candidate, not a committed scope. Don't resume feature design (Kitchen Rage, safety cubes, bank-shot physics) until the gating unknowns have an answer from a real Quest device, not from a model's prediction.
 
 In parallel, and before writing anything submission-facing: pull Meta's current Hands & Eyes documentation and look at "Hands Physics Lab" and "Table Troopers" directly — both are listed on the competition page itself as sample use cases and may already occupy adjacent ground that the submission needs to explicitly differentiate against.
+
+### Correction (2026-10-05): the grab-and-slap spike as originally proposed is confounded
+
+A first version of this document proposed "one hand grabs a cube, the other slaps it, on-device, nothing else built" as the experiment that validates or kills U2 (slap-speed tracking) and U3 (bimanual occlusion). That's necessary but not sufficient, and treating it as sufficient is a real risk: if a first rough implementation of the slap feels bad, there are at least six rival explanations —
+
+1. tracking doesn't support the gesture,
+2. impact detection is poorly tuned,
+3. the physics impulse is miscalibrated,
+4. audiovisual feedback doesn't compensate for the missing haptic contact,
+5. bimanual occlusion breaks the hand-pose estimate,
+6. or the core interaction genuinely does not work on Quest.
+
+Only explanation 6 kills H1. Shipping a mediocre first-pass slap and concluding "Quest can't do this" would be exactly the kind of overinterpretation this document already flagged in the Gemini red-team — mistaking an artifact of the first implementation for a property of the hardware.
+
+**Revised protocol — an interaction spike, not a game, and the questions kept deliberately separate so a bad result in one doesn't contaminate the others:**
+
+- **Stage 0 — table, one object, two hands, nothing else.** No score, no printer, no email swarm, no particles. Particles and audio are exactly the kind of multimodal compensation that can mask a mediocre underlying signal — they come later, deliberately, once the raw signal is characterized.
+- **Stage A — can Quest observe the action at all?** Measured by instrumentation (hand-skeleton confidence, tracking loss events, frame-to-frame jitter during the impact window), not by how it feels. Vary the gesture itself — short wrist flick vs. wider swing, palm vs. back of hand, object held still vs. held by the other hand, varying velocities and hand-to-hand proximity — and log what degrades tracking, independent of subjective judgment.
+- **Stage B — does the interaction feel like a satisfying impact without haptics?** Only run once Stage A has established the tracking signal is usable for at least one gesture variant. Compare bare interaction (no feedback) against the same interaction with audio + deformation + particles added deliberately, to isolate how much of the "feel" is tracking fidelity versus compensatory feedback design.
+- **U1 — is it fun?** Explicitly orthogonal to A and B. Perfect tracking and well-tuned feedback can still produce something boring. This is only answerable by playing, not by instrumenting, and should be asked honestly after A and B are both resolved — not assumed as a byproduct of solving the other two.
+
+If Stage A fails across gesture variants, that's the result that actually kills H1. A bad Stage B result with a working Stage A means iterate on feedback design, not abandon the hypothesis.
+
+### The hypothesis is stronger than "VR but you break things"
+
+"VR but you break things," or even "MR but you break things on a table," is weak and trivially copyable — some version of the rage-room genre already exists. The claim worth defending is more specific:
+
+> A real everyday surface becomes a competitive physical system. Objects have combinable properties, and mastering those properties lets you build increasingly complex kinetic chains. Destruction is the fantasy; combinatorial physics is the game.
+
+Before resuming any design work, the competitive-landscape pass should decompose the space along four axes, not just ask "has rage-room been done": what interaction already exists, what fantasy already exists, what use of MR already exists, what mastery system already exists — then identify what combination of those four is actually novel here.
+
+### Product requirement carried forward as a hard constraint, not a feature
+
+**The clip has to be good by default.** Not "you can record and share" — the system has to know where the interesting moment was and produce something worth sending without the player doing any editing. If a spectacular run requires camera wrangling, replay-scrubbing, trimming, framing, and exporting before it's shareable, the social behavior the whole loop is built around doesn't happen.
+
+### Current state of H1
+
+Conceptually: strong. Competitively: not yet demonstrated — genre decomposition still to be done. Technically: plausible, not validated. Core interaction: not validated. Fun: completely unvalidated, and not answerable until the above is sequenced correctly.
