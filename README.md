@@ -49,8 +49,13 @@ splapground/
 ├── README_ES.md            # Spanish version
 ├── README_TECHNICAL.md     # architecture, validation protocol, sourced research, decisions
 ├── BRAINSTORM.md            # raw original brainstorm, unedited
-└── docs/
-    └── concept-art/         # illustrative AI-generated images referenced above
+├── docs/
+│   ├── concept-art/         # illustrative AI-generated images referenced above
+│   └── setup/
+│       └── QUEST_SETUP.md   # manual Unity Hub / SDK / build-and-deploy steps, not yet run
+└── unity/                   # Unity project (created by opening this folder in Unity Hub,
+    └── Assets/              # see docs/setup/QUEST_SETUP.md — no Editor was available to
+        └── SlapgroundSpike/ # generate ProjectSettings/Packages here, only Assets/ exists
 ```
 
 Built for the **Meta VR Start Developer Competition 2026** (Gaming track, hands-first, New Experience division — deadline Nov 18, 2026). For the validation protocol, the competitive research behind the claims above, the architectural decisions, and the open risks, see the [Technical README](./README_TECHNICAL.md).

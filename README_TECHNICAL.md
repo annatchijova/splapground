@@ -10,9 +10,11 @@ Raw, unedited brainstorm (including the Gemini red-team and the walk-back that c
 
 ## 1. Status, honestly
 
-**H1 (the hypothesis stated in the primary README) is a candidate, not a committed scope.** Nothing described below as "Level 1" has been built. The project is currently pre-spike: no Unity project, no device test, no validated interaction. Concept art in `docs/concept-art/` is AI-generated (Gemini/ChatGPT) illustrative material commissioned to communicate the pitch internally — it is not gameplay footage and must never be presented as such.
+**H1 (the hypothesis stated in the primary README) is a candidate, not a committed scope.** Nothing described below as "Level 1" has been built. Concept art in `docs/concept-art/` is AI-generated (Gemini/ChatGPT) illustrative material commissioned to communicate the pitch internally — it is not gameplay footage and must never be presented as such.
 
-Conceptually: strong. Competitively: researched, not yet fully decomposed. Technically: plausible, not validated. Core interaction: not validated. Fun: completely unvalidated.
+As of 2026-10-08: the Level 0 spike's C# scripts (`unity/Assets/SlapgroundSpike/`) and a manual setup guide (`docs/setup/QUEST_SETUP.md`) exist, written against Meta's current public Unity API reference. None of it has been opened in a Unity Editor, compiled, built, or run — no Unity Hub, Android tooling, or physical Quest was available in the environment that wrote it. There is still no `.unity` scene, no build, and no device test. See `unity/Assets/SlapgroundSpike/README.md` for exactly what's unverified in that code.
+
+Conceptually: strong. Competitively: researched, not yet fully decomposed. Technically: plausible, spike code drafted but unverified. Core interaction: not validated. Fun: completely unvalidated.
 
 ---
 
