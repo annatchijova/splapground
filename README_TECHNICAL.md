@@ -47,15 +47,22 @@ Forces: "the clip has to be good by default" (§6) is the mechanism the entire s
 Assumption: Quest's capture/compositing pipeline (third-person virtual camera, per the original brainstorm) can be driven programmatically to detect and export a highlight window without manual editing.
 Revisit trigger: if investigation of the current SDK capture tooling shows this cannot be triggered/clipped programmatically within what the competition's submission process allows.
 
+**D4 — The two-foot radius is a binding Level 1 design constraint, not an open safety question.**
+Forces: this is not a self-imposed caution, it is the competition's own written Design Guideline — "Seated-optimized: Design for seated, stationary use. Limit roomscale, no large physical movement. Apply the airplane seat test: does every interaction work in a two-foot radius?" (official rules, `BRAINSTORM.md` lines 231-233). A 2026-10-09 audit of an earlier ChatGPT-authored build brief found that document's product framing ("throw... increasingly complex chains of destruction" across the desk) never named this constraint, and could drift the pitch toward something the airplane-seat test fails. This was previously tracked only as U4, an open "is it safe" risk — that undersold it: it is a scored eligibility criterion, known on day one, not something Level 0 needs to discover.
+Assumption: a two-foot radius is not actually a limitation on the core fantasy — grab/slap/ricochet/chain-reaction all plausibly fit within arm's reach of a seated desk; the earlier brainstorm's "whole desk, not a fenced-off box" framing was reacting to a strawman (a small floating cube *above* the desk), not to the competition's actual, more generous two-foot-radius allowance.
+Revisit trigger: none anticipated — this is an external rule, not a hypothesis. If Level 1 playtesting finds the two-foot radius makes chains feel visibly cramped, the fix is combo/trajectory design within the radius, not lobbying to exceed it.
+
 ---
 
 ## 3. Unresolved risks (carried from the brainstorm)
 
-U1 — is impact without haptics satisfying? U2 — does Quest track a real slap at speed? U3 — does bimanual interaction survive hand-on-hand occlusion? U4 — can it be physically safe without caging the fantasy? U5 — does MR add real value over VR-in-a-void? U6 — does skill emerge after 30 minutes or just repetition? U7 — are the "emergent" combos real or imagined on paper? U8 — is this different enough from what already exists?
+U1 — is impact without haptics satisfying? U2 — does Quest track a real slap at speed? U3 — does bimanual interaction survive hand-on-hand occlusion? U5 — does MR add real value over VR-in-a-void? U6 — does skill emerge after 30 minutes or just repetition? U7 — are the "emergent" combos real or imagined on paper? U8 — is this different enough from what already exists?
+
+(U4 was "can it be physically safe without caging the fantasy" — resolved out of this list by D4 above: the radius is a known competition rule, not an open question, so there is nothing left to discover about *whether* to bound the play space, only about designing well inside that bound.)
 
 U2 and U3 gate the project: if a fast double-hand slap loses tracking or the hands occlude each other at the moment of impact, there is no fallback design — the pitch is physical, two-handed, and fast by construction. Everything else (scoring, clips, roadmap) is downstream of those two holding up on real hardware.
 
-Where the brainstorm's own self-critique was right, and stays frozen until U1–U4 answer: the 40×40cm floating interaction cube and "bank-shots only downward" are safety patches bolted onto a game nobody has played yet — they may solve a problem that doesn't exist, or solve it by killing the core promise (the *whole* desk, not a fenced-off box over the keyboard). Any numeric claim about Quest camera Hz, motion blur, or Scene Understanding precision that originated from a model (Gemini or otherwise) is a claim, not a fact, until checked against Meta's current developer documentation.
+Where the brainstorm's own self-critique was right, and stays frozen until U1–U3 answer: the 40×40cm floating interaction cube and "bank-shots only downward" were reacting to a strawman tighter than the competition actually requires — the real constraint (D4) is a two-foot radius around a seated player, materially larger and more natural than a floating cube fixed above the keyboard. Any numeric claim about Quest camera Hz, motion blur, or Scene Understanding precision that originated from a model (Gemini or otherwise) is a claim, not a fact, until checked against Meta's current developer documentation.
 
 ---
 
@@ -75,6 +82,19 @@ An instrumentation exercise, not a game. Explicitly not sufficient to validate o
 - **U1 — is it fun?** Explicitly orthogonal to A and B. Perfect tracking and well-tuned feedback can still produce something boring; only answerable by playing, asked honestly after A and B resolve, never assumed as their byproduct.
 
 If Stage A fails across gesture variants, that's the result that actually kills H1. A bad Stage B result with a working Stage A means iterate on feedback design, not abandon the hypothesis.
+
+### 4.1 Testing without a physical headset
+
+Corrected 2026-10-09: an earlier version of this document implicitly assumed Stage A requires a physical Quest from the first run. It doesn't, and the competition's own rules say so directly — the demo-video requirement explicitly accepts footage "as viewed on a Meta VR device, via XR Simulator, or another equivalent emulator," and Meta's own competition messaging for this cycle states Quest/Glasses hardware target general availability is spring 2027, so the entire developer tooling story this cycle is built around not requiring the device in hand: **Meta XR Simulator** (`com.meta.xr.simulator`), a desktop OpenXR runtime that runs inside Unity Play Mode.
+
+What it actually buys, checked against Meta's current Simulator docs (2026-10-09) rather than assumed:
+- Runs in the Editor via Play Mode — no Android Build Support module, no APK, no USB pairing needed to get this far. This is strictly less setup than `docs/setup/QUEST_SETUP.md`'s on-device path, and should be the *first* thing tried once the project and SDK packages exist — it validates that the spike scripts actually compile and run, independent of any hardware question.
+- Hand input is driven by keyboard/mouse as one of four discrete poses (aim/poke/pinch/grab, keys 1-4; left mouse = pinch) — this is pose simulation, not a continuous tracked gesture, and will not produce a realistic fast-slap velocity profile.
+- v207 (current) adds **camera-driven hand tracking**: simulated hands can be driven from a webcam instead of keyboard poses, per-hand. This is the closest no-headset approximation to an actual physical slap motion available right now, but a webcam's tracking volume, framerate, and occlusion behavior are not the same sensor stack as Quest's onboard cameras — a result here is evidence about the *code path*, not about Quest's real tracking fidelity.
+
+What it does **not** answer: U2/U3 (does Quest's own hand-tracking stack survive a fast two-handed slap at competitive fidelity). That is a claim about Quest's specific onboard sensors and firmware, which no desktop simulator — webcam-driven or not — actually runs. `OVRHand.HandConfidence` under Simulator should be assumed to report whatever the simulator's pose/webcam driver feeds it (likely a constant high-confidence value for keyboard poses), not a real tracking-fidelity signal — unverified in either direction since no Simulator install was available to check directly, but do not report a clean Simulator run as "tracking confidence held up," because the thing being measured is different.
+
+Practical sequencing this changes: run Stage A first in Simulator (keyboard-pose mode, then webcam-driven mode if installed) purely to shake out code bugs and get the logging pipeline producing real CSVs cheaply and repeatedly; treat any result from that as "the instrumentation works," not as "the hardware question is answered." The real U2/U3 verdict still needs either real Quest hardware or, at minimum, an explicit caveat in any submission material that webcam-driven Simulator footage is a proxy, not proof, of on-device fidelity.
 
 ---
 
@@ -180,7 +200,7 @@ Why not chosen: wrong shape for a solo 44-day build; eliminated immediately, not
               a close call.
 ```
 
-**Chosen:** [Unity 6](https://unity.com/) + [C#](https://learn.microsoft.com/en-us/dotnet/csharp/), [OpenXR](https://www.khronos.org/openxr/) via [Unity OpenXR + Meta OpenXR](https://developers.meta.com/horizon/documentation/unity/unity-openxr/), [Meta XR Core SDK](https://developers.meta.com/horizon/downloads/package/meta-xr-core-sdk/), [Meta XR Interaction SDK](https://developers.meta.com/horizon/documentation/unity/unity-isdk-interaction-sdk-overview/), Unity Physics.
+**Chosen:** [Unity 6](https://unity.com/) (6000.0.66f2+) + [C#](https://learn.microsoft.com/en-us/dotnet/csharp/), [OpenXR](https://www.khronos.org/openxr/) via [Unity OpenXR + Meta OpenXR](https://developers.meta.com/horizon/documentation/unity/unity-openxr/), the [Meta XR All-in-One SDK](https://developers.meta.com/horizon/downloads/package/meta-xr-sdk-all-in-one-upm/) (`com.meta.xr.sdk.all`, v207 — this is literally the package the competition's own rules name under "Suggested SDKs: Unity: Meta XR SDKs v81+ (v207) All-in-One XR"; it bundles Core SDK and Interaction SDK rather than installing them as two separate packages, which is what an earlier pass at this document had assumed), plus the [Meta XR Simulator](https://developers.meta.com/vr/downloads/package/meta-xr-simulator-windows/) (`com.meta.xr.simulator`, section 4.1) for no-headset iteration, Unity Physics.
 
 **Why:** the decisive force is SDK/engine maturity for the project's actual gating risk (contact-physics and hand-tracking fidelity, §3's U2/U3) and direct continuity with the engineering precedent already researched in §5 — not language familiarity, which is absent equally across every XR-capable candidate and which AI assistance substantially offsets for the parts of the cost (syntax, boilerplate, API lookup) that it actually offsets.
 

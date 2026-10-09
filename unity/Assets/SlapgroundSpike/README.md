@@ -52,8 +52,10 @@ docs say and move on.
 - `EditorTrialResetBridge.cs` — keyboard-triggered reset for Editor/Link testing only;
   wire a physical poke button for on-device sessions.
 
-All logs land in `Application.persistentDataPath/spike_logs/` on-device — pull them
-with `adb pull` (exact command in the root `docs/setup/QUEST_SETUP.md`).
+All logs land in `Application.persistentDataPath/spike_logs/` — on a desktop machine
+running the Meta XR Simulator (Path A, no headset) that's a normal local OS folder;
+on a real Quest build (Path B) it's on-device and needs `adb pull`. Exact paths and
+commands for both in the root `docs/setup/QUEST_SETUP.md`.
 
 ## Explicitly not built here
 
