@@ -15,7 +15,7 @@ cd core
 ~/.dotnet/dotnet test
 ```
 
-69/69 tests pass as of this commit (run output not just claimed — re-run the command
+83/83 tests pass as of this commit (run output not just claimed — re-run the command
 above to confirm it still does before trusting this line).
 
 **2026-10-09, red team round 1:** found one real correctness defect (`ChaosPerMinute`
@@ -79,6 +79,14 @@ written up the same as the rounds that found things. `docs/red-team-round-3-core
   is unchanged and still duplicates this logic for now; consolidating it to call
   into Core instead is future work once a Unity Editor actually exists to verify
   the wiring (`unity/Assets/SlapgroundSpike/README.md` notes this).
+- `GhostPacer.cs` — the async ghost-trail competitive loop (README.md: "a faint
+  ghost trail of a past run"). Reframed deliberately as a *live pacing*
+  comparison (ahead/behind the ghost's Max Kinetic Chain at the same elapsed
+  time), not a final-score banner — that's what the product brief's own wording
+  actually describes, and it's the one part of "ghost trail" that's pure logic;
+  rendering a visible trail in the scene is Unity-side work not attempted here.
+  Tracks only `MaxChainLength`, the brief's named headline stat — no multi-axis
+  weighted score invented, same reasoning as `HighlightWindowFinder`'s scoring.
 - `HighlightWindowFinder.cs` — D3's "the clip has to be good by default": a
   sliding-window scan over a session's logged impacts that returns the
   fixed-duration window with the highest total impact magnitude, so a highlight
