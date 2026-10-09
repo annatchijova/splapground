@@ -48,6 +48,9 @@ namespace Slapground.Core
         /// <summary>Impacts in the trailing 60 seconds as of <paramref name="now"/>. Call after RecordImpact for the live rate, or on its own to decay a stale session.</summary>
         public int ChaosPerMinute(float now)
         {
+            if (lastImpactTime.HasValue && now < lastImpactTime.Value)
+                throw new ArgumentOutOfRangeException(nameof(now), now, "now is before the most recently recorded impact.");
+
             while (recentImpactTimes.Count > 0 && now - recentImpactTimes.Peek() > 60f)
             {
                 recentImpactTimes.Dequeue();

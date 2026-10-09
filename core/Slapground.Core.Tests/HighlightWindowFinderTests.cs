@@ -76,7 +76,7 @@ namespace Slapground.Core.Tests
         [Fact]
         public void NullImpacts_Throws()
         {
-            Assert.Throws<ArgumentNullException>(() => HighlightWindowFinder.Find(null));
+            Assert.Throws<ArgumentNullException>(() => HighlightWindowFinder.Find(null!));
         }
     }
 }

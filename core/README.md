@@ -15,8 +15,16 @@ cd core
 ~/.dotnet/dotnet test
 ```
 
-45/45 tests pass as of this commit (run output not just claimed — re-run the command
+55/55 tests pass as of this commit (run output not just claimed — re-run the command
 above to confirm it still does before trusting this line).
+
+**2026-10-09, red team round 1:** found one real correctness defect (`ChaosPerMinute`
+accepted an out-of-order `now` and silently miscounted — now throws, matching
+`RecordImpact`'s own contract), falsified one suspected defect (`HighlightWindowFinder`
+fuzzed against a brute-force reference over 300 random streams, 0 divergences), and
+closed one product/UX gap against the competition's own Design Guidelines
+(`SessionClock` had no pause/resume — see below). Full writeup, including the
+discarded vectors, in `docs/red-team-round-1-core.md` at the repo root.
 
 ## What's here
 
@@ -41,7 +49,10 @@ above to confirm it still does before trusting this line).
   backend unchanged.
 - `SessionClock.cs` — the 3-minute Desk Sprint + 10-second Destroy Everything
   session shape named in `README.md`/`README_TECHNICAL.md`, as a phase state
-  machine over caller-supplied timestamps, same style as `ChainTracker`.
+  machine over caller-supplied timestamps, same style as `ChainTracker`. Has
+  `Pause`/`Resume`/`IsPaused` — added in the 2026-10-09 red-team pass once it was
+  checked against the competition's "clean pause/resume" Design Guideline and
+  found missing.
 - `OfficeObjectCatalog.cs` — concrete `PhysicalProperties` for the four named
   Office objects (alarm clock, printer, email notification/swarm archetype,
   corded phone). Every number in it is a first-pass design placeholder reasoned
