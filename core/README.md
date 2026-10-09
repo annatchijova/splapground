@@ -15,7 +15,7 @@ cd core
 ~/.dotnet/dotnet test
 ```
 
-38/38 tests pass as of this commit (run output not just claimed — re-run the command
+45/45 tests pass as of this commit (run output not just claimed — re-run the command
 above to confirm it still does before trusting this line).
 
 ## What's here
@@ -48,6 +48,13 @@ above to confirm it still does before trusting this line).
   from the product brief's own object descriptions, not from any playtest or
   measurement — see the inline comments per object and expect to retune all of it
   once Level 1 has real play sessions.
+- `HighlightWindowFinder.cs` — D3's "the clip has to be good by default": a
+  sliding-window scan over a session's logged impacts that returns the
+  fixed-duration window with the highest total impact magnitude, so a highlight
+  clip can be auto-cut without the player scrubbing anything. Scoring is
+  deliberately simple (sum of magnitudes, no chain-length or recency bonus) —
+  see the file's own comment for why a fancier weighting is deferred rather than
+  guessed at now.
 
 ## Why this and not the collision math itself
 
