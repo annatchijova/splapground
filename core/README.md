@@ -15,7 +15,7 @@ cd core
 ~/.dotnet/dotnet test
 ```
 
-22/22 tests pass as of this commit (run output not just claimed — re-run the command
+38/38 tests pass as of this commit (run output not just claimed — re-run the command
 above to confirm it still does before trusting this line).
 
 ## What's here
@@ -39,6 +39,15 @@ above to confirm it still does before trusting this line).
   `Time.time` or the system clock, which is exactly what makes it testable without
   Unity and reusable from either the Unity side or a future async-leaderboard
   backend unchanged.
+- `SessionClock.cs` — the 3-minute Desk Sprint + 10-second Destroy Everything
+  session shape named in `README.md`/`README_TECHNICAL.md`, as a phase state
+  machine over caller-supplied timestamps, same style as `ChainTracker`.
+- `OfficeObjectCatalog.cs` — concrete `PhysicalProperties` for the four named
+  Office objects (alarm clock, printer, email notification/swarm archetype,
+  corded phone). Every number in it is a first-pass design placeholder reasoned
+  from the product brief's own object descriptions, not from any playtest or
+  measurement — see the inline comments per object and expect to retune all of it
+  once Level 1 has real play sessions.
 
 ## Why this and not the collision math itself
 
