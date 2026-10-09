@@ -43,14 +43,25 @@ Cualquiera puede dar una primera cachetada satisfactoria en segundos. Ser bueno 
 
 **Esto es una hipótesis en validación, no un juego terminado.** Antes de construir nada de lo de arriba de verdad, lo primero que hay que probar en un Quest real es si se puede trackear de forma confiable una cachetada rápida de dos manos — nadie mostró públicamente eso resuelto todavía, ni siquiera en los dos títulos que Meta mismo señala como referencia de diseño hands-first. Esa investigación, el plan de validación completo, y cada decisión de diseño detrás están documentados en profundidad en el [Technical README](./README_TECHNICAL.md) (en inglés).
 
+**Una nota sobre el concept art de arriba:** se encargó el 2026-10-05, antes de que D4 (`README_TECHNICAL.md` sección 2) atara el diseño a la regla propia del concurso de "radio de dos pies, sin movimiento físico amplio" el 2026-10-09. Las cuatro imágenes muestran interacciones y cadenas que cruzan todo el ancho del escritorio — manos llegando a los extremos opuestos, un gráfico de cadena conectando objetos muy separados — más amplio de lo que el diseño comprometido va a entregar realmente. Tratá este arte como referencia de tono/mood, no como una promesa literal del tamaño del espacio de juego; es anterior a la restricción que en teoría debería respetar. No lo reutilices en material de submission sin esta aclaración, y no encargues arte nuevo asumiendo el brief viejo hasta que esto se revise explícitamente.
+
 ```
 splapground/
 ├── README.md              # versión en inglés
 ├── README_ES.md            # este archivo
 ├── README_TECHNICAL.md     # arquitectura, protocolo de validación, investigación sourceada, decisiones
 ├── BRAINSTORM.md            # brainstorm original, sin editar
-└── docs/
-    └── concept-art/         # imágenes ilustrativas generadas con IA referenciadas arriba
+├── docs/
+│   ├── concept-art/         # imágenes ilustrativas generadas con IA referenciadas arriba
+│   └── setup/
+│       └── QUEST_SETUP.md   # pasos manuales de Unity Hub/SDK/build, todavía no ejecutados
+├── unity/                   # proyecto Unity (se crea abriendo esta carpeta en Unity Hub,
+│   └── Assets/              # ver docs/setup/QUEST_SETUP.md — no hubo Editor disponible para
+│       └── SlapgroundSpike/ # generar ProjectSettings/Packages acá, solo existe Assets/
+└── core/                     # Slapground.Core — .NET puro, no necesita Unity; ver core/README.md
+    ├── Slapground.Core/       # lógica de propiedades combinables (D2), reloj de sesión,
+    │                          # cadena/CPM, selección de highlight, ritmo del fantasma, resumen
+    └── Slapground.Core.Tests/ # 102 tests xUnit pasando, corridos de verdad con `dotnet test`
 ```
 
 Construido para la **Meta VR Start Developer Competition 2026** (track Gaming, hands-first, división New Experience — deadline 18 de noviembre de 2026). Para el protocolo de validación, la investigación competitiva detrás de las claims de arriba, las decisiones de arquitectura y los riesgos abiertos, ver el [Technical README](./README_TECHNICAL.md).

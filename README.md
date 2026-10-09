@@ -43,6 +43,8 @@ Anyone can land a satisfying first slap in seconds. Getting good takes longer: t
 
 **This is a tested hypothesis, not a finished game.** Before any of the above gets built for real, the one thing that has to be proven on an actual Quest headset is whether it can reliably track a fast, two-handed slap at all — nobody has publicly shown that solved yet, including in the two titles Meta itself points to as references for hands-first design. That research, the full validation plan, and every design decision behind it are documented in depth in the [Technical README](./README_TECHNICAL.md).
 
+**A note on the concept art above:** it was commissioned 2026-10-05, before D4 (`README_TECHNICAL.md` section 2) bound the design to the competition's own "two-foot radius, no large physical movement" rule on 2026-10-09. All four images show interactions and chain reactions spanning the full width of a desk — hands reaching to opposite edges, a chain graphic connecting objects placed far apart — wider than what the committed design will actually deliver. Treat this art as mood/tone reference only, not a literal promise about play-space size; it predates the constraint it would otherwise need to honor. Don't reuse it in submission material without that caveat, and don't commission new art assuming the old brief until this is explicitly revisited.
+
 ```
 splapground/
 ├── README.md              # this file
@@ -57,8 +59,9 @@ splapground/
 │   └── Assets/              # see docs/setup/QUEST_SETUP.md — no Editor was available to
 │       └── SlapgroundSpike/ # generate ProjectSettings/Packages here, only Assets/ exists
 └── core/                     # Slapground.Core — plain .NET, no Unity needed; see core/README.md
-    ├── Slapground.Core/       # D2 combinable-properties logic (breakage, scoring)
-    └── Slapground.Core.Tests/ # 22 passing xUnit tests, actually run with `dotnet test`
+    ├── Slapground.Core/       # D2 properties/breakage, session clock, chain/CPM,
+    │                          # highlight selection, ghost pacing, session summary
+    └── Slapground.Core.Tests/ # 102 passing xUnit tests, actually run with `dotnet test`
 ```
 
 Built for the **Meta VR Start Developer Competition 2026** (Gaming track, hands-first, New Experience division — deadline Nov 18, 2026). For the validation protocol, the competitive research behind the claims above, the architectural decisions, and the open risks, see the [Technical README](./README_TECHNICAL.md).
