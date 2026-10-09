@@ -37,6 +37,12 @@ namespace Slapground.Core
         /// parameter to accidentally pass an unrelated list to (see
         /// ChainTracker.Impacts' own comment for why that changed). Call once,
         /// at session end (SessionPhase.Ended).
+        ///
+        /// Round-6 composition fix (docs/red-team-round-6-core.md): elapsedSeconds
+        /// is cross-checked against the chain's own last recorded impact time -
+        /// unlike round 5's ChainTracker/GhostPacer seam, this one CAN be fixed by
+        /// construction, because both values are already parameters of this same
+        /// call and there's no reason not to check one against the other here.
         /// </summary>
         public static SessionResult Capture(
             ChainTracker chain,
@@ -44,6 +50,17 @@ namespace Slapground.Core
             float highlightWindowDurationSeconds = 8f)
         {
             if (chain == null) throw new ArgumentNullException(nameof(chain));
+
+            if (chain.Impacts.Count > 0)
+            {
+                float lastImpactTime = chain.Impacts[chain.Impacts.Count - 1].Time;
+                if (elapsedSeconds < lastImpactTime)
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(elapsedSeconds), elapsedSeconds,
+                        $"elapsedSeconds ({elapsedSeconds}) is before the chain's own last recorded impact at {lastImpactTime} - this session's elapsed time and its impact log disagree.");
+                }
+            }
 
             var highlight = HighlightWindowFinder.Find(chain.Impacts, highlightWindowDurationSeconds);
             return new SessionResult(chain.MaxChainLength, chain.PeakChaosPerMinute, highlight, elapsedSeconds);

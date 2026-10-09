@@ -15,8 +15,15 @@ cd core
 ~/.dotnet/dotnet test
 ```
 
-99/99 tests pass as of this commit (run output not just claimed — re-run the command
-above to confirm it still does before trusting this line).
+102/102 tests pass as of this commit (run output not just claimed — re-run the
+command above to confirm it still does before trusting this line).
+
+**2026-10-09, red team round 6 (composition):** closed the one item round 5 had
+deferred — `SessionResult.Capture` now rejects an `elapsedSeconds` earlier than
+the chain's own last recorded impact (confirmed by induction first, then fixed
+by construction, since both values arrive at the same call). Also re-surveyed the
+whole public API for the same family of seam and found nothing further.
+`docs/red-team-round-6-core.md`.
 
 **2026-10-09, red team round 5 (composition, time origin):** `ChainTracker` and
 `GhostPacer` both take caller-supplied timestamps with no shared origin enforced
