@@ -36,7 +36,14 @@ docs say and move on.
 
 - `HandVelocityBuffer.cs` — the D1 windowed/buffered velocity estimator: ring-buffers
   recent positions of one tracked transform, exposes both the naive single-frame
-  velocity (for comparison) and a buffered estimate from ~50ms earlier.
+  velocity (for comparison) and a buffered estimate from ~50ms earlier. **Now
+  duplicated by `core/Slapground.Core/VelocityBuffer.cs`**, which is the actually
+  tested version (`docs/red-team-round-2-core.md` measured the buffering's real
+  effect on a synthetic glitch: ~4x error reduction, not immunity). This script
+  should eventually delegate to that one instead of keeping its own copy of the
+  algorithm — not done yet because there's no Unity Editor here to verify a
+  cross-assembly reference actually resolves; don't let the two drift once that
+  consolidation happens.
 - `HandPhysicsRig.cs` + `HandBoneMarker.cs` — attaches small kinematic capsule
   colliders to a subset of `OVRSkeleton` bones (wrist + five fingertips) so a
   hand-tracked hand has real PhysX presence and can transfer momentum to a Rigidbody

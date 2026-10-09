@@ -15,7 +15,7 @@ cd core
 ~/.dotnet/dotnet test
 ```
 
-55/55 tests pass as of this commit (run output not just claimed — re-run the command
+60/60 tests pass as of this commit (run output not just claimed — re-run the command
 above to confirm it still does before trusting this line).
 
 **2026-10-09, red team round 1:** found one real correctness defect (`ChaosPerMinute`
@@ -25,6 +25,13 @@ fuzzed against a brute-force reference over 300 random streams, 0 divergences), 
 closed one product/UX gap against the competition's own Design Guidelines
 (`SessionClock` had no pause/resume — see below). Full writeup, including the
 discarded vectors, in `docs/red-team-round-1-core.md` at the repo root.
+
+**2026-10-09, red team round 2:** ported D1's windowed/buffered velocity estimator
+out of the unverified Unity spike script into `VelocityBuffer.cs`, then actually
+measured its central claim with a synthetic tracking-glitch test instead of citing
+precedent and assuming it transfers — buffering cut a single-glitch-frame velocity
+error by ~4x (13.5 m/s down to 3.4 m/s in the test scenario) but does not erase it.
+Full writeup in `docs/red-team-round-2-core.md`.
 
 ## What's here
 
@@ -59,6 +66,13 @@ discarded vectors, in `docs/red-team-round-1-core.md` at the repo root.
   from the product brief's own object descriptions, not from any playtest or
   measurement — see the inline comments per object and expect to retune all of it
   once Level 1 has real play sessions.
+- `VelocityBuffer.cs` — D1's windowed/buffered velocity estimator, ported from
+  the unverified Unity spike script (`unity/Assets/SlapgroundSpike/Scripts/
+  HandVelocityBuffer.cs`) into this tested layer. Uses `System.Numerics.Vector3`,
+  not `UnityEngine.Vector3` — still zero Unity dependency. The Unity spike script
+  is unchanged and still duplicates this logic for now; consolidating it to call
+  into Core instead is future work once a Unity Editor actually exists to verify
+  the wiring (`unity/Assets/SlapgroundSpike/README.md` notes this).
 - `HighlightWindowFinder.cs` — D3's "the clip has to be good by default": a
   sliding-window scan over a session's logged impacts that returns the
   fixed-duration window with the highest total impact magnitude, so a highlight
