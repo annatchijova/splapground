@@ -15,7 +15,7 @@ cd core
 ~/.dotnet/dotnet test
 ```
 
-60/60 tests pass as of this commit (run output not just claimed — re-run the command
+69/69 tests pass as of this commit (run output not just claimed — re-run the command
 above to confirm it still does before trusting this line).
 
 **2026-10-09, red team round 1:** found one real correctness defect (`ChaosPerMinute`
@@ -32,6 +32,12 @@ measured its central claim with a synthetic tracking-glitch test instead of citi
 precedent and assuming it transfers — buffering cut a single-glitch-frame velocity
 error by ~4x (13.5 m/s down to 3.4 m/s in the test scenario) but does not erase it.
 Full writeup in `docs/red-team-round-2-core.md`.
+
+**2026-10-09, red team round 3:** fuzzed four invariants (Fragility/impulse
+monotonicity in `BreakageRule`, the Max≥Current chain invariant, `VelocityBuffer`'s
+never-before-tested overflow/eviction path, `SessionClock`'s float-boundary
+behavior across phase transitions). All four held — an honest no-findings round,
+written up the same as the rounds that found things. `docs/red-team-round-3-core.md`.
 
 ## What's here
 
