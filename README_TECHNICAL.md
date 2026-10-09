@@ -14,6 +14,8 @@ Raw, unedited brainstorm (including the Gemini red-team and the walk-back that c
 
 As of 2026-10-08: the Level 0 spike's C# scripts (`unity/Assets/SlapgroundSpike/`) and a manual setup guide (`docs/setup/QUEST_SETUP.md`) exist, written against Meta's current public Unity API reference. None of it has been opened in a Unity Editor, compiled, built, or run — no Unity Hub, Android tooling, or physical Quest was available in the environment that wrote it. There is still no `.unity` scene, no build, and no device test. See `unity/Assets/SlapgroundSpike/README.md` for exactly what's unverified in that code.
 
+As of 2026-10-09: `core/Slapground.Core` exists — the D2 combinable-properties logic (breakage rule, physics-material mapping, Max Kinetic Chain/CPM scoring) as a plain .NET class library with 22 passing xUnit tests, genuinely run with `dotnet test`, not just written against documentation. This is the one piece of the project actually verified end-to-end so far, precisely because it needs no Unity Editor, device, or Simulator — see `core/README.md`.
+
 Conceptually: strong. Competitively: researched, not yet fully decomposed. Technically: plausible, spike code drafted but unverified. Core interaction: not validated. Fun: completely unvalidated.
 
 ---
