@@ -20,6 +20,20 @@ namespace Slapground.Core
         public float MaxGapSeconds { get; }
 
         private readonly Queue<float> recentImpactTimes = new Queue<float>();
+
+        /// <summary>
+        /// Every impact this tracker has ever recorded, in order, with
+        /// magnitude. Added during a round-4 (composition) red-team pass:
+        /// SessionResult.Capture used to take a separately-supplied impacts list
+        /// alongside the tracker, with nothing enforcing the two described the
+        /// same event stream - a caller could pass an unrelated list and get a
+        /// silently inconsistent SessionResult. Making this tracker the single
+        /// source of truth for "what happened, and when, and how hard" removes
+        /// that class of bug by construction instead of documenting around it.
+        /// </summary>
+        private readonly List<ImpactRecord> impactLog = new List<ImpactRecord>();
+        public IReadOnlyList<ImpactRecord> Impacts => impactLog;
+
         private float? lastImpactTime;
 
         public int CurrentChainLength { get; private set; }
@@ -34,8 +48,8 @@ namespace Slapground.Core
             MaxGapSeconds = maxGapSeconds;
         }
 
-        /// <summary>Record one impact. Timestamps must be non-decreasing - this is a live stream, not a sort.</summary>
-        public void RecordImpact(float timestamp)
+        /// <summary>Record one impact. Timestamps must be non-decreasing - this is a live stream, not a sort. magnitude defaults to 0 for callers that only care about chain/CPM timing, not highlight scoring.</summary>
+        public void RecordImpact(float timestamp, float magnitude = 0f)
         {
             if (lastImpactTime.HasValue && timestamp < lastImpactTime.Value)
                 throw new ArgumentOutOfRangeException(nameof(timestamp), timestamp, "Timestamps must be non-decreasing.");
@@ -46,6 +60,7 @@ namespace Slapground.Core
 
             lastImpactTime = timestamp;
             recentImpactTimes.Enqueue(timestamp);
+            impactLog.Add(new ImpactRecord(timestamp, magnitude));
         }
 
         /// <summary>Impacts in the trailing 60 seconds as of <paramref name="now"/>. Call after RecordImpact for the live rate, or on its own to decay a stale session.</summary>

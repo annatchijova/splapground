@@ -15,8 +15,17 @@ cd core
 ~/.dotnet/dotnet test
 ```
 
-95/95 tests pass as of this commit (run output not just claimed — re-run the command
+97/97 tests pass as of this commit (run output not just claimed — re-run the command
 above to confirm it still does before trusting this line).
+
+**2026-10-09, red team round 4 (composition):** found a real one — `SessionResult.
+Capture` took a `ChainTracker` and a separately-supplied impacts list with nothing
+enforcing they described the same session, so a caller could silently combine two
+unrelated event streams into one "coherent-looking" result. Confirmed by induction,
+then fixed by construction: `ChainTracker` now logs its own impacts
+(`ChainTracker.Impacts`, with an optional `magnitude` on `RecordImpact`), and
+`Capture` reads that instead of taking a second parameter — the mismatch is no
+longer expressible. `docs/red-team-round-4-core.md`.
 
 **2026-10-09, red team round 1:** found one real correctness defect (`ChaosPerMinute`
 accepted an out-of-order `now` and silently miscounted — now throws, matching
@@ -82,14 +91,19 @@ written up the same as the rounds that found things. `docs/red-team-round-3-core
 - `SessionResult.cs` — the end-of-session summary: wires together
   `ChainTracker.MaxChainLength`/`PeakChaosPerMinute` and
   `HighlightWindowFinder`'s result into one immutable record, built with
-  `SessionResult.Capture(...)` once a session ends. Pure integration, no new
-  scoring — only buildable now that every piece it reads from had already
-  survived its own red-team round. `Beats(other)` compares on `MaxChainLength`
-  only, same single-axis restraint as `GhostPacer`.
-- `ChainTracker.PeakChaosPerMinute` — added alongside `SessionResult` since the
-  summary needed a session-long CPM peak and `ChaosPerMinute(now)` only ever
-  returned the current rolling value; updates each time `ChaosPerMinute` is
-  polled, not continuously (documented and tested).
+  `SessionResult.Capture(chain, elapsedSeconds, ...)` once a session ends. Pure
+  integration, no new scoring — only buildable now that every piece it reads
+  from had already survived its own red-team round. `Beats(other)` compares on
+  `MaxChainLength` only, same single-axis restraint as `GhostPacer`. `Capture`
+  originally also took a separate impacts list — removed in the round-4
+  composition fix below, because nothing enforced it matched the tracker.
+- `ChainTracker.PeakChaosPerMinute` and `ChainTracker.Impacts` — `PeakChaosPerMinute`
+  added alongside `SessionResult` since the summary needed a session-long CPM peak
+  (`ChaosPerMinute(now)` only ever returned the current rolling value); updates
+  each time `ChaosPerMinute` is polled, not continuously (documented and tested).
+  `Impacts` (with an optional `magnitude` parameter added to `RecordImpact`) makes
+  the tracker the single source of truth for a session's full impact log — added
+  in the round-4 composition fix, not from the start.
 - `GhostPacer.cs` — the async ghost-trail competitive loop (README.md: "a faint
   ghost trail of a past run"). Reframed deliberately as a *live pacing*
   comparison (ahead/behind the ghost's Max Kinetic Chain at the same elapsed

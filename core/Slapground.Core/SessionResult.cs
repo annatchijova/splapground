@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace Slapground.Core
 {
@@ -31,16 +30,22 @@ namespace Slapground.Core
             ElapsedSeconds = elapsedSeconds;
         }
 
-        /// <summary>Builds a result from a session's live ChainTracker and its full impact log. Call once, at session end (SessionPhase.Ended).</summary>
+        /// <summary>
+        /// Builds a result from a session's live ChainTracker, which is now the
+        /// single source of truth for both the chain/CPM stats and the impact
+        /// log the highlight scan reads - there is no separate impacts
+        /// parameter to accidentally pass an unrelated list to (see
+        /// ChainTracker.Impacts' own comment for why that changed). Call once,
+        /// at session end (SessionPhase.Ended).
+        /// </summary>
         public static SessionResult Capture(
             ChainTracker chain,
-            IReadOnlyList<ImpactRecord> impacts,
             float elapsedSeconds,
             float highlightWindowDurationSeconds = 8f)
         {
             if (chain == null) throw new ArgumentNullException(nameof(chain));
 
-            var highlight = HighlightWindowFinder.Find(impacts, highlightWindowDurationSeconds);
+            var highlight = HighlightWindowFinder.Find(chain.Impacts, highlightWindowDurationSeconds);
             return new SessionResult(chain.MaxChainLength, chain.PeakChaosPerMinute, highlight, elapsedSeconds);
         }
 

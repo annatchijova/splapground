@@ -10,20 +10,13 @@ namespace Slapground.Core.Tests
         public void Capture_WiresUpChainTrackerAndHighlightCorrectly()
         {
             var chain = new ChainTracker();
-            var impacts = new[]
+            foreach (float time in new[] { 0f, 1f, 2f })
             {
-                new ImpactRecord(0f, 5f),
-                new ImpactRecord(1f, 5f),
-                new ImpactRecord(2f, 5f),
-            };
-
-            foreach (var impact in impacts)
-            {
-                chain.RecordImpact(impact.Time);
-                chain.ChaosPerMinute(impact.Time);
+                chain.RecordImpact(time, magnitude: 5f);
+                chain.ChaosPerMinute(time);
             }
 
-            var result = SessionResult.Capture(chain, impacts, elapsedSeconds: 190f);
+            var result = SessionResult.Capture(chain, elapsedSeconds: 190f);
 
             Assert.Equal(3, result.MaxChainLength);
             Assert.Equal(3, result.PeakChaosPerMinute);
@@ -36,7 +29,7 @@ namespace Slapground.Core.Tests
         public void Capture_WithNoImpacts_HasNullHighlightAndZeroStats()
         {
             var chain = new ChainTracker();
-            var result = SessionResult.Capture(chain, Array.Empty<ImpactRecord>(), elapsedSeconds: 190f);
+            var result = SessionResult.Capture(chain, elapsedSeconds: 190f);
 
             Assert.Equal(0, result.MaxChainLength);
             Assert.Null(result.Highlight);
@@ -46,7 +39,7 @@ namespace Slapground.Core.Tests
         public void Capture_NullChainTracker_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                SessionResult.Capture(null!, Array.Empty<ImpactRecord>(), elapsedSeconds: 0f));
+                SessionResult.Capture(null!, elapsedSeconds: 0f));
         }
 
         [Theory]
