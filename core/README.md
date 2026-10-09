@@ -15,7 +15,7 @@ cd core
 ~/.dotnet/dotnet test
 ```
 
-83/83 tests pass as of this commit (run output not just claimed — re-run the command
+95/95 tests pass as of this commit (run output not just claimed — re-run the command
 above to confirm it still does before trusting this line).
 
 **2026-10-09, red team round 1:** found one real correctness defect (`ChaosPerMinute`
@@ -79,6 +79,17 @@ written up the same as the rounds that found things. `docs/red-team-round-3-core
   is unchanged and still duplicates this logic for now; consolidating it to call
   into Core instead is future work once a Unity Editor actually exists to verify
   the wiring (`unity/Assets/SlapgroundSpike/README.md` notes this).
+- `SessionResult.cs` — the end-of-session summary: wires together
+  `ChainTracker.MaxChainLength`/`PeakChaosPerMinute` and
+  `HighlightWindowFinder`'s result into one immutable record, built with
+  `SessionResult.Capture(...)` once a session ends. Pure integration, no new
+  scoring — only buildable now that every piece it reads from had already
+  survived its own red-team round. `Beats(other)` compares on `MaxChainLength`
+  only, same single-axis restraint as `GhostPacer`.
+- `ChainTracker.PeakChaosPerMinute` — added alongside `SessionResult` since the
+  summary needed a session-long CPM peak and `ChaosPerMinute(now)` only ever
+  returned the current rolling value; updates each time `ChaosPerMinute` is
+  polled, not continuously (documented and tested).
 - `GhostPacer.cs` — the async ghost-trail competitive loop (README.md: "a faint
   ghost trail of a past run"). Reframed deliberately as a *live pacing*
   comparison (ahead/behind the ghost's Max Kinetic Chain at the same elapsed

@@ -25,6 +25,9 @@ namespace Slapground.Core
         public int CurrentChainLength { get; private set; }
         public int MaxChainLength { get; private set; }
 
+        /// <summary>The highest value ChaosPerMinute has ever returned for this tracker - updated each time ChaosPerMinute is called, not continuously, so a session that never polls it never gets a peak.</summary>
+        public int PeakChaosPerMinute { get; private set; }
+
         public ChainTracker(float maxGapSeconds = 1.5f)
         {
             if (maxGapSeconds <= 0f) throw new ArgumentOutOfRangeException(nameof(maxGapSeconds));
@@ -55,6 +58,7 @@ namespace Slapground.Core
             {
                 recentImpactTimes.Dequeue();
             }
+            PeakChaosPerMinute = Math.Max(PeakChaosPerMinute, recentImpactTimes.Count);
             return recentImpactTimes.Count;
         }
     }
