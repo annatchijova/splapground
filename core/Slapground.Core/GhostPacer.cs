@@ -8,6 +8,15 @@ namespace Slapground.Core
     /// one of these every time ChainTracker.MaxChainLength changes during a
     /// session to build a ghost's timeline - the raw material GhostPacer compares
     /// against.
+    ///
+    /// Time contract (round-5 composition finding, docs/red-team-round-5-core.md):
+    /// Time must be SessionClock.GetElapsedSeconds(now) from THAT past session -
+    /// the same conversion the live session's ChainTracker.RecordImpact calls
+    /// must also use. Mixing a raw-engine-time-stamped ghost with a session-
+    /// relative live chain (or vice versa) doesn't throw; GetGhostChainLengthAt
+    /// silently returns 0 or a stale plateau because every checkpoint's Time
+    /// stops lining up with the live elapsed axis - confirmed by induction, not
+    /// a hypothetical.
     /// </summary>
     public readonly struct GhostCheckpoint
     {

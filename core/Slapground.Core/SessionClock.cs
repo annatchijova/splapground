@@ -76,9 +76,26 @@ namespace Slapground.Core
             pausedAt = null;
         }
 
-        private float EffectiveElapsed(float now)
+        /// <summary>
+        /// Converts a raw time value (whatever clock `now` is measured on - engine
+        /// time, a Unix timestamp, anything monotonic) into pause-adjusted seconds
+        /// since Start(). This is the ONE place that conversion should happen.
+        ///
+        /// Added public during a round-5 (composition) red-team pass: ChainTracker
+        /// and GhostPacer both take caller-supplied timestamps with no shared
+        /// origin enforced between them - if impacts are timestamped with raw
+        /// engine time in one place and a ghost's checkpoints were recorded on a
+        /// different basis, GhostPacer's pacing comparison silently produces a
+        /// wrong, confident number instead of an error (confirmed by induction,
+        /// docs/red-team-round-5-core.md). Routing every timestamp fed into
+        /// ChainTracker.RecordImpact and GhostCheckpoint through this one function
+        /// doesn't make the mismatch impossible (Core can't enforce what a Unity-
+        /// side caller does), but it removes the ambiguity about what "elapsed"
+        /// should mean by giving it exactly one correct source.
+        /// </summary>
+        public float GetElapsedSeconds(float now)
         {
-            if (!startTime.HasValue) throw new InvalidOperationException("EffectiveElapsed called before Start().");
+            if (!startTime.HasValue) throw new InvalidOperationException("GetElapsedSeconds called before Start().");
 
             float rawElapsed = now - startTime.Value;
             float pausedSoFar = totalPausedDuration + (pausedAt.HasValue ? now - pausedAt.Value : 0f);
@@ -89,7 +106,7 @@ namespace Slapground.Core
         {
             if (!startTime.HasValue) return SessionPhase.Idle;
 
-            float elapsed = EffectiveElapsed(now);
+            float elapsed = GetElapsedSeconds(now);
             if (elapsed < 0f) throw new ArgumentOutOfRangeException(nameof(now), now, "now is before Start().");
 
             if (elapsed < SprintDurationSeconds) return SessionPhase.DeskSprint;
@@ -102,7 +119,7 @@ namespace Slapground.Core
         {
             if (!startTime.HasValue) return 0f;
 
-            float elapsed = EffectiveElapsed(now);
+            float elapsed = GetElapsedSeconds(now);
             SessionPhase phase = GetPhase(now);
 
             return phase switch

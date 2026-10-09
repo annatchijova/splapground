@@ -14,6 +14,15 @@ namespace Slapground.Core
     /// chain instead of continuing it. CPM is a rolling 60-second impact count,
     /// not a session-average - a quiet start shouldn't make a hot finish look
     /// worse than it is.
+    ///
+    /// Timestamp contract (round-5 composition finding, docs/red-team-round-5-core.md):
+    /// every timestamp passed to RecordImpact must be produced by the same
+    /// SessionClock.GetElapsedSeconds(now) call a GhostPacer's checkpoints for
+    /// this same session will also be built from. Nothing in this class can
+    /// enforce that - it's a caller discipline contract, not a type-checked one
+    /// but if it's violated, a later GhostPacer comparison against this
+    /// tracker's recorded chain will silently compare against the wrong
+    /// time axis instead of erroring.
     /// </summary>
     public class ChainTracker
     {

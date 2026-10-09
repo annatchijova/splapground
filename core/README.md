@@ -15,8 +15,17 @@ cd core
 ~/.dotnet/dotnet test
 ```
 
-97/97 tests pass as of this commit (run output not just claimed — re-run the command
+99/99 tests pass as of this commit (run output not just claimed — re-run the command
 above to confirm it still does before trusting this line).
+
+**2026-10-09, red team round 5 (composition, time origin):** `ChainTracker` and
+`GhostPacer` both take caller-supplied timestamps with no shared origin enforced
+between them — mixing a raw-engine-time ghost with a session-relative live chain
+doesn't throw, it silently reports a confident, wrong pacing delta (confirmed by
+induction: `GetPacingDelta` returned "+6 ahead" from pure time-basis garbage).
+`SessionClock.EffectiveElapsed` is now public as `GetElapsedSeconds(now)` — the
+one correct conversion both `ChainTracker.RecordImpact` and `GhostCheckpoint.Time`
+must be built from, documented in both classes. `docs/red-team-round-5-core.md`.
 
 **2026-10-09, red team round 4 (composition):** found a real one — `SessionResult.
 Capture` took a `ChainTracker` and a separately-supplied impacts list with nothing
@@ -74,7 +83,10 @@ written up the same as the rounds that found things. `docs/red-team-round-3-core
   machine over caller-supplied timestamps, same style as `ChainTracker`. Has
   `Pause`/`Resume`/`IsPaused` — added in the 2026-10-09 red-team pass once it was
   checked against the competition's "clean pause/resume" Design Guideline and
-  found missing.
+  found missing. `GetElapsedSeconds(now)` is the canonical raw-time-to-session-
+  relative-elapsed conversion — made public in the round-5 composition fix below;
+  anything that timestamps a `ChainTracker` impact or a `GhostCheckpoint` should
+  come from this one function.
 - `OfficeObjectCatalog.cs` — concrete `PhysicalProperties` for the four named
   Office objects (alarm clock, printer, email notification/swarm archetype,
   corded phone). Every number in it is a first-pass design placeholder reasoned
