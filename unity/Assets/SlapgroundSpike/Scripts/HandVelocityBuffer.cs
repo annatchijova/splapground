@@ -28,6 +28,11 @@ namespace Slapground.Spike
 
         public Transform Tracked => tracked;
 
+        public void SetTracked(Transform target)
+        {
+            tracked = target;
+        }
+
         private void Reset()
         {
             tracked = transform;

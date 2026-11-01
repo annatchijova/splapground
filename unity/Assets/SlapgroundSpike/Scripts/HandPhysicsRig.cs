@@ -80,6 +80,7 @@ namespace Slapground.Spike
                 rb.useGravity = false;
 
                 var buffer = proxy.AddComponent<HandVelocityBuffer>();
+                buffer.SetTracked(proxy.transform);
 
                 var marker = proxy.AddComponent<HandBoneMarker>();
                 marker.HandLabel = handLabel;
