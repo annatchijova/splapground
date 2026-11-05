@@ -53,8 +53,6 @@ splapground/
 ├── BRAINSTORM.md            # raw original brainstorm, unedited
 ├── docs/
 │   ├── concept-art/         # illustrative AI-generated images referenced above
-│   ├── submission/
-│   │   └── SUBMISSION_DRAFT.md      # draft competition submission form, not filed yet
 │   ├── brainstorm-fun-and-visuals-2026-10-09.md  # ideas, not commitments — see file
 │   └── setup/
 │       └── QUEST_SETUP.md   # manual Unity Hub / SDK / build-and-deploy steps, not yet run
